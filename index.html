@@ -497,7 +497,7 @@
     const msgBox = document.getElementById("msg-box-forgot");
     if (!email) { msgBox.textContent = "กรุณากรอกอีเมลของคุณ"; msgBox.className = "msg error show"; return; }
     const btn = document.getElementById("btn-send-reset");
-    btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> กำลังส่ง...';
+    btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> กำลังส่ง....';
     try {
       await sendPasswordResetEmail(auth, email);
       document.getElementById("success-email-desc").innerHTML =
