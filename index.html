@@ -353,13 +353,13 @@
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
   const firebaseConfig = {
-    apiKey:            "AIzaSyBKhes9uVB7tFATNChmYJtkSGXtoV8pGoI",
-    authDomain:        "civiltoolskit.firebaseapp.com",
-    projectId:         "civiltoolskit",
-    storageBucket:     "civiltoolskit.firebasestorage.app",
-    messagingSenderId: "108662763128",
-    appId:             "1:108662763128:web:9ebf8987c628bcd852878d",
-    measurementId:     "G-XN3CGMHJKD"
+    apiKey:            "AIzaSyDaWWpY45r-cz82ZeFnhPp9M9cJa4jHWhA",
+    authDomain:        "horsuktheoneandbanglamung.firebaseapp.com",
+    projectId:         "horsuktheoneandbanglamung",
+    storageBucket:     "horsuktheoneandbanglamung.firebasestorage.app",
+    messagingSenderId: "709541137329",
+    appId:             "1:709541137329:web:00bb1272fa769d2b748b90",
+    measurementId:     "G-MQRD44B91F"
   };
 
   const app  = initializeApp(firebaseConfig);
@@ -413,9 +413,9 @@
       const now = Date.now();
       if (!loginTime) {
         localStorage.setItem(SESSION_KEY, now.toString());
-        window.location.href = "https://tanapawnj2.github.io/tanapawnj2.githup.io/index.html";
+        window.location.href = "calendar.html";
       } else if ((now - parseInt(loginTime)) < SESSION_LIMIT) {
-        window.location.href = "https://tanapawnj2.github.io/tanapawnj2.githup.io/index.html";
+        window.location.href = "calendar.html";
       } else {
         await signOut(auth);
         localStorage.removeItem(SESSION_KEY);
