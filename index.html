@@ -413,9 +413,9 @@
       const now = Date.now();
       if (!loginTime) {
         localStorage.setItem(SESSION_KEY, now.toString());
-        window.location.href = "Main.html";
+        window.location.href = "https://tanapawnj2.github.io/tanapawnj2.githup.io/index.html";
       } else if ((now - parseInt(loginTime)) < SESSION_LIMIT) {
-        window.location.href = "Main.html";
+        window.location.href = "https://tanapawnj2.github.io/tanapawnj2.githup.io/index.html";
       } else {
         await signOut(auth);
         localStorage.removeItem(SESSION_KEY);
