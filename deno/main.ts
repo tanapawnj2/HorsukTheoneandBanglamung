@@ -19,10 +19,12 @@ const MILESTONES = [
   { key: "notif5", m: 5, label: "อีก 5 นาที" },
   { key: "notif0", m: 0, label: "ถึงเวลาแล้ว" },
 ];
-// เลยกำหนด: เริ่มหลังเลยเวลา 1 นาที ซ้ำทุก 10 นาที สูงสุด 6 ครั้ง
-const OVERDUE_FIRST_MIN = 1;
-const OVERDUE_INTERVAL_MIN = 10;
-const MAX_OVERDUE = 6;
+// เลยกำหนด: แจ้งเมื่อเลยเวลานัดมา 5 / 15 / 30 นาที (แล้วหยุด)
+const OVERDUE_MILESTONES = [
+  { key: "over5", m: 5, label: "เลยเวลานัดมา 5 นาที" },
+  { key: "over15", m: 15, label: "เลยเวลานัดมา 15 นาที" },
+  { key: "over30", m: 30, label: "เลยเวลานัดมา 30 นาที" },
+];
 
 // ── Firestore value helpers ──
 // deno-lint-ignore no-explicit-any
@@ -205,15 +207,18 @@ Deno.cron("event-reminder", "* * * * *", async () => {
 
     // เลยกำหนดเวลาแล้ว และยังไม่กดรับทราบ (event ยังอยู่)
     const lateMin = -diffMin;
-    const oc = (ev.overdueCount as number) || 0;
-    if (oc >= MAX_OVERDUE) continue;
-    const nextDue = OVERDUE_FIRST_MIN + oc * OVERDUE_INTERVAL_MIN;
-    if (lateMin >= nextDue) {
+    const dueOver = OVERDUE_MILESTONES.filter(
+      (o) => !ev[o.key] && lateMin >= o.m - 1e-6,
+    );
+    if (dueOver.length) {
+      const pick = dueOver.reduce((a, b) => (b.m > a.m ? b : a));
       await linePush(target, [
-        eventText(ev, `⚠️ เลยกำหนดเวลาแล้ว (เลยมา ~${Math.round(lateMin)} นาที)`),
+        eventText(ev, `⚠️ ${pick.label}`),
         ackButton(ev.id),
       ]);
-      await patchEvent(ev.id, { overdueCount: oc + 1, notif0: true });
+      const upd: Record<string, boolean> = { notif0: true };
+      dueOver.forEach((o) => (upd[o.key] = true));
+      await patchEvent(ev.id, upd);
     }
   }
 });
