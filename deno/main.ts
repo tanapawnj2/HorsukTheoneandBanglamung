@@ -92,9 +92,13 @@ async function deleteEvent(id: string): Promise<boolean> {
   return res.ok;
 }
 
+// เก็บ userId ไว้ใน collection calendar_events (collection เดียวที่ rules อนุญาต)
+// ใช้ doc id พิเศษที่ปฏิทิน/cron จะข้ามเพราะไม่มี dateStart/timeStart
+const CONFIG_DOC = "__line_config__";
+
 async function getTarget(): Promise<string> {
   if (ENV_TARGET) return ENV_TARGET;
-  const res = await fetch(`${FS}/config/line?key=${API_KEY}`);
+  const res = await fetch(`${FS}/calendar_events/${CONFIG_DOC}?key=${API_KEY}`);
   if (!res.ok) return "";
   const d = await res.json();
   return (fieldsToObj(d.fields ?? {}).userId as string) ?? "";
@@ -102,7 +106,7 @@ async function getTarget(): Promise<string> {
 
 async function setConfigUser(uid: string) {
   const res = await fetch(
-    `${FS}/config/line?key=${API_KEY}&updateMask.fieldPaths=userId`,
+    `${FS}/calendar_events/${CONFIG_DOC}?key=${API_KEY}&updateMask.fieldPaths=userId`,
     {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -179,6 +183,7 @@ Deno.cron("event-reminder", "* * * * *", async () => {
   const now = Date.now();
 
   for (const ev of events) {
+    if (ev.id === CONFIG_DOC) continue; // ข้าม doc เก็บ config
     if (!ev.dateStart || !ev.timeStart) continue; // ข้าม event ที่ไม่มีเวลา
     const startMs = Date.parse(`${ev.dateStart}T${ev.timeStart}:00+07:00`);
     if (Number.isNaN(startMs)) continue;
