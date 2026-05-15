@@ -94,7 +94,7 @@ async function deleteEvent(id: string): Promise<boolean> {
 
 // เก็บ userId ไว้ใน collection calendar_events (collection เดียวที่ rules อนุญาต)
 // ใช้ doc id พิเศษที่ปฏิทิน/cron จะข้ามเพราะไม่มี dateStart/timeStart
-const CONFIG_DOC = "__line_config__";
+const CONFIG_DOC = "line-target-config";
 
 async function getTarget(): Promise<string> {
   if (ENV_TARGET) return ENV_TARGET;
