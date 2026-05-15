@@ -125,15 +125,6 @@
     }
     .more-badge:hover { color: var(--accent); }
 
-    /* Legend */
-    .legend-bar {
-      display: flex; align-items: center; gap: 1.25rem;
-      padding: 0.75rem 1.5rem; border-top: 1px solid var(--border);
-      flex-wrap: wrap;
-    }
-    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; color: var(--muted); }
-    .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
-
     /* ── Modal ── */
     .modal-overlay {
       position: fixed; inset: 0; background: rgba(0,0,0,0.6);
@@ -185,6 +176,55 @@
       transition: all 0.2s; box-shadow: 0 4px 16px rgba(0,0,0,0.2);
     }
     .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── Day Panel ── */
+    .day-panel-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+      z-index: 90; opacity: 0; pointer-events: none; transition: opacity 0.2s;
+    }
+    .day-panel-overlay.show { opacity: 1; pointer-events: all; }
+    .day-panel {
+      position: fixed; top: 0; right: 0; height: 100%;
+      width: 100%; max-width: 380px;
+      background: var(--surface); border-left: 1px solid var(--border);
+      box-shadow: -16px 0 48px rgba(0,0,0,0.4);
+      transform: translateX(100%); transition: transform 0.25s ease;
+      display: flex; flex-direction: column; z-index: 91;
+    }
+    .day-panel-overlay.show .day-panel { transform: translateX(0); }
+    .dp-header {
+      padding: 1.25rem 1.4rem; border-bottom: 1px solid var(--border);
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem;
+    }
+    .dp-date { font-size: 1.05rem; font-weight: 600; }
+    .dp-sub { font-size: 0.76rem; color: var(--muted); margin-top: 2px; }
+    .dp-close {
+      background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text); width: 30px; height: 30px; border-radius: 50%;
+      cursor: pointer; font-size: 1rem; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s;
+    }
+    .dp-close:hover { border-color: var(--accent); color: var(--accent); }
+    .dp-list { flex: 1; overflow-y: auto; padding: 1rem 1.4rem; display: flex; flex-direction: column; gap: 8px; }
+    .dp-item {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 12px; padding: 0.8rem 0.9rem; cursor: pointer;
+      display: flex; gap: 10px; transition: border-color 0.15s, transform 0.1s;
+    }
+    .dp-item:hover { border-color: var(--accent); transform: translateY(-1px); }
+    .dp-bar { width: 4px; border-radius: 4px; flex-shrink: 0; }
+    .dp-item-name { font-size: 0.9rem; font-weight: 600; }
+    .dp-item-sub { font-size: 0.76rem; color: var(--muted); margin-top: 3px; }
+    .dp-item-range { font-size: 0.72rem; color: var(--muted); margin-top: 5px; }
+    .dp-item-note { font-size: 0.76rem; color: var(--text); opacity: 0.8; margin-top: 5px; white-space: pre-wrap; }
+    .dp-empty {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 8px;
+      color: var(--muted); font-size: 0.85rem; text-align: center;
+    }
+    .dp-footer { padding: 1rem 1.4rem; border-top: 1px solid var(--border); }
+    .dp-footer .btn { width: 100%; }
   </style>
 </head>
 <body>
@@ -220,8 +260,22 @@
   <div class="month-grid" id="month-grid"></div>
 </div>
 
-<!-- Legend -->
-<div class="legend-bar" id="legend-bar"></div>
+<!-- Day Panel -->
+<div class="day-panel-overlay" id="day-panel-overlay">
+  <div class="day-panel" id="day-panel">
+    <div class="dp-header">
+      <div>
+        <div class="dp-date" id="dp-date"></div>
+        <div class="dp-sub" id="dp-sub"></div>
+      </div>
+      <button class="dp-close" id="dp-close">✕</button>
+    </div>
+    <div class="dp-list" id="dp-list"></div>
+    <div class="dp-footer">
+      <button class="btn primary" id="dp-add">+ เพิ่ม Event วันนี้</button>
+    </div>
+  </div>
+</div>
 
 <!-- Modal -->
 <div class="modal-overlay" id="modal">
@@ -243,6 +297,16 @@
       <div class="form-group">
         <label>วันที่สิ้นสุด</label>
         <input type="date" id="ev-date-end" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>เวลาเริ่ม (ไม่บังคับ)</label>
+        <input type="time" id="ev-time-start" />
+      </div>
+      <div class="form-group">
+        <label>เวลาสิ้นสุด (ไม่บังคับ)</label>
+        <input type="time" id="ev-time-end" />
       </div>
     </div>
     <div class="form-group">
@@ -288,10 +352,12 @@ const MONTHS_SHORT = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT
 let events = [];
 let cur = { y: new Date().getFullYear(), m: new Date().getMonth() };
 let editingId = null;
+let openDayStr = null;
 let selectedColor = COLORS[0];
-const todayStr = new Date().toISOString().split('T')[0];
-
-function fmt(d) { return d.toISOString().split('T')[0]; }
+function fmt(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+const todayStr = fmt(new Date());
 function getDatesInRange(start, end) {
   const dates = []; const s = new Date(start); const e = new Date(end);
   for (let d = new Date(s); d <= e; d.setDate(d.getDate()+1)) dates.push(fmt(new Date(d)));
@@ -302,6 +368,7 @@ function getDatesInRange(start, end) {
 onSnapshot(query(COL, orderBy("dateStart")), snap => {
   events = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   renderMonth();
+  if (openDayStr) renderDayPanel(openDayStr);
 });
 
 function renderMonth() {
@@ -337,7 +404,7 @@ function renderMonth() {
     if (col === 0) cls += ' sun';
     if (col === 6) cls += ' sat';
     cell.className = cls;
-    cell.onclick = () => openModal(null, dateStr);
+    cell.onclick = () => openDayPanel(dateStr);
 
     const num = document.createElement('div');
     num.className = 'date-num'; num.textContent = date.getDate();
@@ -352,7 +419,7 @@ function renderMonth() {
       const chip = document.createElement('div');
       chip.className = 'event-chip';
       chip.style.background = ev.color || COLORS[0];
-      chip.innerHTML = `<div>${ev.name}</div>${ev.sub ? `<div class="chip-subtitle">${ev.sub}</div>` : ''}`;
+      chip.innerHTML = `<div>${ev.timeStart ? `${ev.timeStart} ` : ''}${ev.name}</div>${ev.sub ? `<div class="chip-subtitle">${ev.sub}</div>` : ''}`;
       chip.onclick = e => { e.stopPropagation(); openModal(ev.id); };
       chips.appendChild(chip);
     });
@@ -360,27 +427,13 @@ function renderMonth() {
       const more = document.createElement('div');
       more.className = 'more-badge';
       more.textContent = `+${dayEvs.length - MAX_SHOW} อื่นๆ`;
-      more.onclick = e => { e.stopPropagation(); openModal(null, dateStr); };
+      more.onclick = e => { e.stopPropagation(); openDayPanel(dateStr); };
       chips.appendChild(more);
     }
 
     cell.appendChild(chips);
     grid.appendChild(cell);
   }
-  renderLegend();
-}
-
-function renderLegend() {
-  const usedColors = [...new Set(events.map(e => e.color))].filter(Boolean).slice(0, 6);
-  const lb = document.getElementById('legend-bar');
-  lb.innerHTML = '';
-  usedColors.forEach(c => {
-    const ev = events.find(e => e.color === c);
-    const item = document.createElement('div');
-    item.className = 'legend-item';
-    item.innerHTML = `<div class="legend-dot" style="background:${c}"></div><span>${ev ? ev.name : ''}</span>`;
-    lb.appendChild(item);
-  });
 }
 
 function buildColorPicker() {
@@ -412,6 +465,8 @@ function openModal(id, dateStr) {
     document.getElementById('ev-sub').value        = ev.sub || '';
     document.getElementById('ev-date-start').value = ev.dateStart;
     document.getElementById('ev-date-end').value   = ev.dateEnd;
+    document.getElementById('ev-time-start').value = ev.timeStart || '';
+    document.getElementById('ev-time-end').value   = ev.timeEnd || '';
     document.getElementById('ev-note').value       = ev.note || '';
     selectedColor = ev.color || COLORS[0];
     buildColorPicker();
@@ -422,6 +477,8 @@ function openModal(id, dateStr) {
     document.getElementById('ev-sub').value        = '';
     document.getElementById('ev-date-start').value = dateStr || todayStr;
     document.getElementById('ev-date-end').value   = dateStr || todayStr;
+    document.getElementById('ev-time-start').value = '';
+    document.getElementById('ev-time-end').value   = '';
     document.getElementById('ev-note').value       = '';
   }
   document.getElementById('modal').classList.add('show');
@@ -433,16 +490,81 @@ function closeModal() { document.getElementById('modal').classList.remove('show'
 document.getElementById('cancel-btn').onclick = closeModal;
 document.getElementById('modal').onclick = e => { if (e.target === e.currentTarget) closeModal(); };
 
+// ── Day Panel ──
+const TH_MONTHS = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+const TH_DAYS = ['วันอาทิตย์','วันจันทร์','วันอังคาร','วันพุธ','วันพฤหัสบดี','วันศุกร์','วันเสาร์'];
+
+function thaiDate(dateStr) {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const dt = new Date(y, m - 1, d);
+  return { full: `${d} ${TH_MONTHS[m - 1]} ${y + 543}`, weekday: TH_DAYS[dt.getDay()] };
+}
+
+function renderDayPanel(dateStr) {
+  const { full, weekday } = thaiDate(dateStr);
+  document.getElementById('dp-date').textContent = full;
+  const dayEvs = events.filter(ev => getDatesInRange(ev.dateStart, ev.dateEnd).includes(dateStr));
+  document.getElementById('dp-sub').textContent = `${weekday} · ${dayEvs.length} event`;
+
+  const list = document.getElementById('dp-list');
+  list.innerHTML = '';
+  if (dayEvs.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'dp-empty';
+    empty.innerHTML = `<div style="font-size:2rem;">📅</div><div>ยังไม่มี event ในวันนี้</div>`;
+    list.appendChild(empty);
+    return;
+  }
+  dayEvs.forEach(ev => {
+    const item = document.createElement('div');
+    item.className = 'dp-item';
+    const range = ev.dateStart === ev.dateEnd
+      ? thaiDate(ev.dateStart).full
+      : `${thaiDate(ev.dateStart).full} → ${thaiDate(ev.dateEnd).full}`;
+    const timeText = ev.timeStart
+      ? (ev.timeEnd ? `${ev.timeStart} – ${ev.timeEnd} น.` : `${ev.timeStart} น.`)
+      : '';
+    item.innerHTML =
+      `<div class="dp-bar" style="background:${ev.color || COLORS[0]}"></div>` +
+      `<div style="flex:1;min-width:0;">` +
+      `<div class="dp-item-name">${ev.name}</div>` +
+      (ev.sub ? `<div class="dp-item-sub">${ev.sub}</div>` : '') +
+      (timeText ? `<div class="dp-item-range">🕒 ${timeText}</div>` : '') +
+      `<div class="dp-item-range">🗓 ${range}</div>` +
+      (ev.note ? `<div class="dp-item-note">${ev.note}</div>` : '') +
+      `</div>`;
+    item.onclick = () => { closeDayPanel(); openModal(ev.id); };
+    list.appendChild(item);
+  });
+}
+
+function openDayPanel(dateStr) {
+  openDayStr = dateStr;
+  renderDayPanel(dateStr);
+  document.getElementById('day-panel-overlay').classList.add('show');
+}
+
+function closeDayPanel() {
+  openDayStr = null;
+  document.getElementById('day-panel-overlay').classList.remove('show');
+}
+
+document.getElementById('dp-close').onclick = closeDayPanel;
+document.getElementById('day-panel-overlay').onclick = e => { if (e.target === e.currentTarget) closeDayPanel(); };
+document.getElementById('dp-add').onclick = () => { const d = openDayStr; closeDayPanel(); openModal(null, d); };
+
 document.getElementById('save-btn').onclick = async () => {
   const name  = document.getElementById('ev-name').value.trim();
   const sub   = document.getElementById('ev-sub').value.trim();
   const ds    = document.getElementById('ev-date-start').value;
   const de    = document.getElementById('ev-date-end').value;
+  const ts    = document.getElementById('ev-time-start').value;
+  const te    = document.getElementById('ev-time-end').value;
   const note  = document.getElementById('ev-note').value.trim();
   if (!name || !ds || !de) return;
 
   const dateEnd = de < ds ? ds : de;
-  const payload = { name, sub, dateStart: ds, dateEnd, note, color: selectedColor };
+  const payload = { name, sub, dateStart: ds, dateEnd, timeStart: ts, timeEnd: te, note, color: selectedColor };
 
   if (editingId) {
     await updateDoc(doc(db, "calendar_events", editingId), payload);
