@@ -11,14 +11,15 @@ const LINE_TOKEN = Deno.env.get("LINE_CHANNEL_ACCESS_TOKEN") ?? "";
 const LINE_SECRET = Deno.env.get("LINE_CHANNEL_SECRET") ?? "";
 const ENV_TARGET = Deno.env.get("LINE_TARGET_USER_ID") ?? "";
 
-// แจ้งเตือนล่วงหน้า: 60 / 30 / 15 / 5 นาที และถึงเวลา (0)
+// แจ้งเตือนล่วงหน้า: 60 / 30 / 15 / 5 นาที (ก่อนถึงเวลา)
 const MILESTONES = [
   { key: "notif60", m: 60, label: "อีก 1 ชั่วโมง" },
   { key: "notif30", m: 30, label: "อีก 30 นาที" },
   { key: "notif15", m: 15, label: "อีก 15 นาที" },
   { key: "notif5", m: 5, label: "อีก 5 นาที" },
-  { key: "notif0", m: 0, label: "ถึงเวลาแล้ว" },
 ];
+// ถึงเวลานัด: ยิงเมื่อถึง/เพิ่งเลยเวลา แต่ยังไม่ถึงเลยมา 5 นาที
+const AT_TIME_LABEL = "ถึงเวลาแล้ว";
 // เลยกำหนด: แจ้งเมื่อเลยเวลานัดมา 5 / 15 / 30 นาที (แล้วหยุด)
 const OVERDUE_MILESTONES = [
   { key: "over5", m: 5, label: "เลยเวลานัดมา 5 นาที" },
@@ -191,7 +192,10 @@ Deno.cron("event-reminder", "* * * * *", async () => {
     if (Number.isNaN(startMs)) continue;
     const diffMin = (startMs - now) / 60000;
 
-    if (diffMin >= 0) {
+    const lateMin = -diffMin; // > 0 = เลยเวลามาแล้ว
+
+    // 1) ก่อนถึงเวลา: 60 / 30 / 15 / 5 นาที
+    if (diffMin > 1e-6) {
       const due = MILESTONES.filter(
         (m) => !ev[m.key] && diffMin <= m.m + 1e-6,
       );
@@ -205,8 +209,19 @@ Deno.cron("event-reminder", "* * * * *", async () => {
       continue;
     }
 
-    // เลยกำหนดเวลาแล้ว และยังไม่กดรับทราบ (event ยังอยู่)
-    const lateMin = -diffMin;
+    // 2) ถึงเวลานัด (0): ยิงครั้งเดียว ถ้ายังไม่เลยมาถึง 5 นาที
+    if (!ev.notif0 && lateMin < 5) {
+      await linePush(target, [
+        eventText(ev, AT_TIME_LABEL),
+        ackButton(ev.id),
+      ]);
+      const upd: Record<string, boolean> = { notif0: true };
+      MILESTONES.forEach((m) => (upd[m.key] = true));
+      await patchEvent(ev.id, upd);
+      continue;
+    }
+
+    // 3) เลยกำหนด: เลยมา 5 / 15 / 30 นาที (แล้วหยุด)
     const dueOver = OVERDUE_MILESTONES.filter(
       (o) => !ev[o.key] && lateMin >= o.m - 1e-6,
     );
@@ -217,6 +232,7 @@ Deno.cron("event-reminder", "* * * * *", async () => {
         ackButton(ev.id),
       ]);
       const upd: Record<string, boolean> = { notif0: true };
+      MILESTONES.forEach((m) => (upd[m.key] = true));
       dueOver.forEach((o) => (upd[o.key] = true));
       await patchEvent(ev.id, upd);
     }
