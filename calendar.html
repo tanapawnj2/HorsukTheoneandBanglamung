@@ -58,6 +58,220 @@
     .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 500; }
     .btn.primary:hover { opacity: 0.88; color: #fff; }
 
+    /* ── View Tabs & Clock ── */
+    .view-tabs {
+      display: flex; background: var(--surface2);
+      border: 1px solid var(--border); border-radius: 8px;
+      padding: 3px; gap: 3px;
+    }
+    .view-tab {
+      background: none; border: none; color: var(--muted);
+      font-family: 'DM Sans', sans-serif; font-size: 0.8rem; font-weight: 500;
+      padding: 0.34rem 0.9rem; border-radius: 6px; cursor: pointer;
+      transition: background 0.15s, color 0.15s; white-space: nowrap;
+    }
+    .view-tab.active { background: var(--accent); color: #fff; }
+    .view-tab:not(.active):hover { color: var(--accent); }
+
+    .topbar-clock {
+      display: flex; flex-direction: column; align-items: flex-end;
+      line-height: 1.25; font-variant-numeric: tabular-nums;
+      margin-right: 4px;
+    }
+    .topbar-clock .clock-time {
+      font-size: 1rem; font-weight: 600; color: var(--text);
+      letter-spacing: 0.03em;
+    }
+    .topbar-clock .clock-date { font-size: 0.72rem; color: var(--muted); }
+
+    @media (max-width: 760px) {
+      .topbar { flex-wrap: wrap; }
+      .topbar-clock { align-items: flex-start; }
+    }
+
+    /* ── Day View (24h Timeline) ── */
+    .day-wrap { flex: 1; padding: 1.1rem 1.5rem 2rem; width: 100%; }
+
+    .dv-layout { display: flex; gap: 1.25rem; align-items: flex-start; }
+    .dv-main { flex: 1; min-width: 0; }
+    .dv-cal {
+      flex-shrink: 0; width: 268px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 0.95rem 1rem;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.12);
+    }
+    :root.light .dv-cal { box-shadow: 0 4px 14px rgba(0,0,0,0.06); }
+    @media (max-width: 920px) {
+      .dv-layout { flex-direction: column; }
+      .dv-cal { width: 100%; max-width: 360px; margin: 0 auto; }
+    }
+    .mc-head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+    .mc-title { font-size: 0.96rem; font-weight: 600; }
+    .mc-nav { display: flex; gap: 5px; }
+    .mc-btn {
+      width: 27px; height: 27px; border-radius: 7px;
+      background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text); cursor: pointer; font-size: 0.9rem;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .mc-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .mc-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+    .mc-wd {
+      text-align: center; font-size: 0.66rem; font-weight: 600;
+      color: var(--muted); padding: 4px 0;
+    }
+    .mc-wd.sun { color: #f87171; }
+    .mc-wd.sat { color: #60a5fa; }
+    .mc-day {
+      aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+      font-size: 0.78rem; border-radius: 50%; cursor: pointer; color: var(--text);
+      transition: background 0.15s, color 0.15s; user-select: none;
+    }
+    .mc-day:hover { background: var(--surface2); }
+    .mc-day.other { opacity: 0.4; }
+    .mc-day.sun { color: #f87171; }
+    .mc-day.sat { color: #60a5fa; }
+    .mc-day.today { box-shadow: inset 0 0 0 1.5px var(--accent); }
+    .mc-day.sel, .mc-day.sel:hover {
+      background: var(--accent); color: #fff; font-weight: 700;
+    }
+
+    .dv-datehead {
+      display: flex; align-items: center; justify-content: center;
+      gap: 0.7rem; margin-bottom: 0.9rem; flex-wrap: wrap;
+    }
+    .dv-dmy { font-size: 1.3rem; font-weight: 700; letter-spacing: 0.07em; }
+    .dv-wd {
+      font-size: 0.8rem; color: var(--muted);
+      padding: 3px 11px; border: 1px solid var(--border); border-radius: 99px;
+    }
+    .dv-wd.is-today {
+      color: #fff; background: var(--accent);
+      border-color: var(--accent); font-weight: 600;
+    }
+
+    /* all-day strip */
+    .vt-allday { display: flex; flex-direction: column; gap: 5px; margin-bottom: 8px; }
+    .vt-ad {
+      border-radius: 6px; padding: 5px 11px; font-size: 0.76rem; font-weight: 600;
+      cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      transition: filter 0.15s, transform 0.1s;
+    }
+    .vt-ad:hover { filter: brightness(1.07); transform: translateY(-1px); }
+
+    /* vertical timeline (Google-Calendar style) */
+    .vt-scroll {
+      overflow-y: auto; max-height: 64vh; padding: 10px 0;
+      border: 1px solid var(--border); border-radius: 14px;
+      background: var(--surface); box-shadow: 0 4px 22px rgba(0,0,0,0.18);
+    }
+    :root.light .vt-scroll { box-shadow: 0 4px 18px rgba(0,0,0,0.07); }
+    .vt-grid { position: relative; --gut: 70px; }
+    .vt-rows { position: absolute; inset: 0; }
+    .vt-row {
+      position: relative; height: 48px; border-top: 1px solid var(--border);
+    }
+    .vt-rows .vt-row:first-child { border-top: none; }
+    .vt-row::after {
+      content: ''; position: absolute; left: var(--gut); right: 0; top: 50%;
+      border-top: 1px dashed var(--border); opacity: 0.45;
+    }
+    .vt-h {
+      position: absolute; left: 0; width: calc(var(--gut) - 8px);
+      text-align: right; transform: translateY(-50%);
+      font-size: 0.68rem; color: var(--muted);
+      font-variant-numeric: tabular-nums; white-space: nowrap;
+      background: var(--surface); padding: 1px 0;
+    }
+    .vt-h.is-now { color: var(--accent); font-weight: 700; }
+
+    .vt-col {
+      position: absolute; top: 0; bottom: 0; left: var(--gut); right: 8px;
+      border-left: 1px solid var(--border);
+    }
+    .vt-col::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 0;
+      background: linear-gradient(to bottom,
+        rgba(255,255,255,0.03) 0 25%,
+        transparent 25% 79.17%,
+        rgba(255,255,255,0.03) 79.17% 100%);
+    }
+    :root.light .vt-col::before {
+      background: linear-gradient(to bottom,
+        rgba(0,0,0,0.038) 0 25%,
+        transparent 25% 79.17%,
+        rgba(0,0,0,0.038) 79.17% 100%);
+    }
+
+    .vt-ev {
+      position: absolute; box-sizing: border-box; border-radius: 6px;
+      padding: 3px 8px; overflow: hidden; cursor: pointer; z-index: 1;
+      display: flex; flex-direction: column; gap: 1px;
+      font-size: 0.72rem; line-height: 1.2;
+      border: 1px solid rgba(0,0,0,0.12);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+      transition: filter 0.15s, box-shadow 0.15s;
+    }
+    .vt-ev:hover { filter: brightness(1.06); box-shadow: 0 4px 12px rgba(0,0,0,0.35); z-index: 3; }
+    .vt-ev .e-t { font-weight: 700; opacity: 0.85; font-size: 0.66rem; font-variant-numeric: tabular-nums; }
+    .vt-ev .e-n { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .vt-now {
+      position: absolute; left: 0; right: 0; height: 0;
+      border-top: 2px solid #ef4444; z-index: 5; pointer-events: none;
+    }
+    .vt-now::before {
+      content: ''; position: absolute; left: -4px; top: -5px;
+      width: 9px; height: 9px; border-radius: 50%; background: #ef4444;
+    }
+    .vt-now-lbl {
+      position: absolute; top: -8px; left: 0;
+      transform: translateX(calc(-100% - 7px));
+      background: #ef4444; color: #fff; font-size: 0.6rem; font-weight: 700;
+      padding: 1px 5px; border-radius: 4px; white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .dv-agenda {
+      display: flex; flex-direction: column; gap: 7px;
+      margin-top: 0.9rem; padding-top: 0.9rem;
+      border-top: 1px solid var(--border);
+      max-height: 44vh; overflow-y: auto;
+    }
+    .dv-row {
+      display: flex; align-items: stretch; gap: 9px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 0.6rem 0.7rem; cursor: pointer;
+      transition: border-color 0.15s, transform 0.1s;
+    }
+    .dv-row:hover { border-color: var(--accent); transform: translateX(2px); }
+    .dv-row .r-bar { width: 4px; border-radius: 4px; flex-shrink: 0; }
+    .dv-row .r-time {
+      min-width: 52px; flex-shrink: 0; font-size: 0.78rem; font-weight: 700;
+      color: var(--accent); font-variant-numeric: tabular-nums;
+      display: flex; flex-direction: column; justify-content: center; gap: 1px;
+    }
+    .dv-row .r-time .r-allday { color: var(--muted); font-weight: 600; }
+    .dv-row .r-body { flex: 1; min-width: 0; }
+    .dv-row .r-name { font-size: 0.9rem; font-weight: 600; }
+    .dv-row .r-sub { font-size: 0.76rem; color: var(--muted); margin-top: 2px; }
+    .dv-row .r-note {
+      font-size: 0.76rem; color: var(--text); opacity: 0.75;
+      margin-top: 4px; white-space: pre-wrap;
+    }
+
+    .dv-empty {
+      text-align: center; color: var(--muted);
+      padding: 1.4rem 0.5rem 0.4rem; font-size: 0.82rem;
+      margin-top: 0.9rem; border-top: 1px solid var(--border);
+    }
+    .dv-empty .dv-emoji { font-size: 1.7rem; display: block; margin-bottom: 0.3rem; }
+
     /* ── Calendar Container ── */
     .cal-wrap { flex: 1; padding: 1.25rem 1.5rem; }
 
@@ -240,14 +454,22 @@
     <button class="btn icon" id="prev-btn">‹</button>
     <button class="btn icon" id="next-btn">›</button>
   </div>
+  <div class="view-tabs">
+    <button class="view-tab active" id="vt-month">เดือน</button>
+    <button class="view-tab" id="vt-day">รายวัน</button>
+  </div>
   <div class="topbar-title" id="cal-title">Monthly Events <span></span></div>
   <div class="topbar-right">
+    <div class="topbar-clock">
+      <span class="clock-time" id="clock-time">--:--:--</span>
+      <span class="clock-date" id="clock-date">—</span>
+    </div>
     <button class="btn primary" id="add-btn">+ เพิ่ม Event</button>
   </div>
 </div>
 
 <!-- Calendar -->
-<div class="cal-wrap">
+<div class="cal-wrap" id="cal-wrap">
   <div class="day-headers">
     <div class="day-label sun">อา</div>
     <div class="day-label">จ</div>
@@ -258,6 +480,43 @@
     <div class="day-label sat">ส</div>
   </div>
   <div class="month-grid" id="month-grid"></div>
+</div>
+
+<!-- Day View (24h Timeline) -->
+<div class="day-wrap" id="day-wrap" style="display:none;">
+  <div class="dv-layout">
+    <div class="dv-cal">
+      <div class="mc-head">
+        <div class="mc-title" id="mc-title"></div>
+        <div class="mc-nav">
+          <button class="mc-btn" id="mc-prev">‹</button>
+          <button class="mc-btn" id="mc-next">›</button>
+        </div>
+      </div>
+      <div class="mc-grid" id="mc-grid"></div>
+      <div class="dv-agenda" id="dv-agenda"></div>
+      <div class="dv-empty" id="dv-empty" style="display:none;">
+        <span class="dv-emoji">🗓️</span>ยังไม่มี event ในวันนี้
+      </div>
+    </div>
+    <div class="dv-main">
+      <div class="dv-datehead">
+        <span class="dv-dmy" id="dv-dmy">DD / MM / YYYY</span>
+        <span class="dv-wd" id="dv-wd"></span>
+      </div>
+      <div class="vt-allday" id="vt-allday" style="display:none;"></div>
+      <div class="vt-scroll" id="vt-scroll">
+        <div class="vt-grid" id="vt-grid">
+          <div class="vt-rows" id="vt-rows"></div>
+          <div class="vt-col" id="vt-col">
+            <div class="vt-now" id="vt-now" style="display:none;">
+              <span class="vt-now-lbl" id="vt-now-lbl"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Day Panel -->
@@ -348,6 +607,7 @@ const COL = collection(db, "calendar_events");
 
 const COLORS = ['#e8688a','#3b82f6','#10b981','#f59e0b','#8b5cf6','#06b6d4','#f97316','#1e3a5f'];
 const MONTHS_SHORT = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+const EN_MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
 let events = [];
 let cur = { y: new Date().getFullYear(), m: new Date().getMonth() };
@@ -358,16 +618,34 @@ function fmt(d) {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 const todayStr = fmt(new Date());
+let viewMode = 'month';   // 'month' | 'day'
+let curDay = todayStr;    // selected date for day (agenda) view
+let miniY = new Date().getFullYear();   // mini calendar shown month
+let miniM = new Date().getMonth();
 function getDatesInRange(start, end) {
   const dates = []; const s = new Date(start); const e = new Date(end);
   for (let d = new Date(s); d <= e; d.setDate(d.getDate()+1)) dates.push(fmt(new Date(d)));
   return dates;
 }
+// เรียง event ในวันเดียวกัน: แบบทั้งวัน (ไม่มีเวลา) ขึ้นก่อน แล้วตามด้วยเวลาจากน้อยไปมาก
+function sortByTime(list) {
+  return list.slice().sort((a, b) => {
+    const ta = a.timeStart || '', tb = b.timeStart || '';
+    if (ta && tb) return ta < tb ? -1 : ta > tb ? 1 : 0;
+    if (ta && !tb) return 1;
+    if (!ta && tb) return -1;
+    return (a.name || '').localeCompare(b.name || '');
+  });
+}
+function shiftDay(dateStr, delta) {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return fmt(new Date(y, m - 1, d + delta));
+}
 
 // ── Real-time listener ──
 onSnapshot(query(COL, orderBy("dateStart")), snap => {
   events = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  renderMonth();
+  if (viewMode === 'day') renderDayView(); else renderMonth();
   if (openDayStr) renderDayPanel(openDayStr);
 });
 
@@ -413,7 +691,7 @@ function renderMonth() {
     const chips = document.createElement('div');
     chips.className = 'event-chips';
 
-    const dayEvs = events.filter(ev => getDatesInRange(ev.dateStart, ev.dateEnd).includes(dateStr));
+    const dayEvs = sortByTime(events.filter(ev => getDatesInRange(ev.dateStart, ev.dateEnd).includes(dateStr)));
     const MAX_SHOW = 3;
     dayEvs.slice(0, MAX_SHOW).forEach(ev => {
       const chip = document.createElement('div');
@@ -452,7 +730,7 @@ function buildColorPicker() {
   });
 }
 
-function openModal(id, dateStr) {
+function openModal(id, dateStr, timeStr) {
   editingId = id || null;
   selectedColor = COLORS[0];
   buildColorPicker();
@@ -477,7 +755,7 @@ function openModal(id, dateStr) {
     document.getElementById('ev-sub').value        = '';
     document.getElementById('ev-date-start').value = dateStr || todayStr;
     document.getElementById('ev-date-end').value   = dateStr || todayStr;
-    document.getElementById('ev-time-start').value = '';
+    document.getElementById('ev-time-start').value = timeStr || '';
     document.getElementById('ev-time-end').value   = '';
     document.getElementById('ev-note').value       = '';
   }
@@ -503,7 +781,7 @@ function thaiDate(dateStr) {
 function renderDayPanel(dateStr) {
   const { full, weekday } = thaiDate(dateStr);
   document.getElementById('dp-date').textContent = full;
-  const dayEvs = events.filter(ev => getDatesInRange(ev.dateStart, ev.dateEnd).includes(dateStr));
+  const dayEvs = sortByTime(events.filter(ev => getDatesInRange(ev.dateStart, ev.dateEnd).includes(dateStr)));
   document.getElementById('dp-sub').textContent = `${weekday} · ${dayEvs.length} event`;
 
   const list = document.getElementById('dp-list');
@@ -536,6 +814,244 @@ function renderDayPanel(dateStr) {
     item.onclick = () => { closeDayPanel(); openModal(ev.id); };
     list.appendChild(item);
   });
+}
+
+// ── Day View (vertical timeline, Google-Calendar style) ──
+const HP = 48;                       // ความสูงต่อ 1 ชั่วโมง (px)
+function fmtHour12(h) {               // h: 0..24 -> { n, ap }
+  const hh = h % 24;
+  const ap = hh < 12 ? 'AM' : 'PM';
+  let n = hh % 12; if (n === 0) n = 12;
+  return { n, ap };
+}
+function toMin(t) { const [h, m] = t.split(':').map(Number); return h * 60 + m; }
+function textOn(hex) {                // เลือกสีตัวอักษรให้อ่านง่ายตามพื้นหลัง
+  const c = hex.replace('#', '');
+  const r = parseInt(c.substr(0, 2), 16),
+        g = parseInt(c.substr(2, 2), 16),
+        b = parseInt(c.substr(4, 2), 16);
+  return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.62 ? '#1a1a1a' : '#fff';
+}
+
+function updateNowLine() {
+  const el = document.getElementById('vt-now');
+  if (!el) return;
+  if (viewMode !== 'day' || curDay !== todayStr) { el.style.display = 'none'; return; }
+  const now = new Date();
+  const min = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
+  el.style.top = (min / 60 * HP) + 'px';
+  el.style.display = '';
+  const lbl = document.getElementById('vt-now-lbl');
+  if (lbl) lbl.textContent =
+    `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+}
+
+// จัดคอลัมน์ event ที่เวลาทับกัน (แบบ Google Calendar)
+function packEvents(items) {
+  const sorted = items.slice().sort((a, b) => a.s - b.s || a.e - b.e);
+  let group = [], gEnd = -1;
+  const flush = () => {
+    if (!group.length) return;
+    const colEnds = [];
+    group.forEach(it => {
+      let placed = false;
+      for (let c = 0; c < colEnds.length; c++) {
+        if (it.s >= colEnds[c]) { it.col = c; colEnds[c] = it.e; placed = true; break; }
+      }
+      if (!placed) { it.col = colEnds.length; colEnds.push(it.e); }
+    });
+    group.forEach(it => it.cols = colEnds.length);
+    group = []; gEnd = -1;
+  };
+  sorted.forEach(it => {
+    if (group.length && it.s >= gEnd) flush();
+    group.push(it); gEnd = Math.max(gEnd, it.e);
+  });
+  flush();
+  return sorted;
+}
+
+// ปฏิทินเดือนเล็ก (date picker) ในแท็บรายวัน
+function renderMiniCal() {
+  document.getElementById('mc-title').textContent = `${EN_MONTHS[miniM]} ${miniY}`;
+  const grid = document.getElementById('mc-grid');
+  grid.innerHTML = '';
+  ['S','M','T','W','T','F','S'].forEach((w, i) => {
+    const c = document.createElement('div');
+    c.className = 'mc-wd' + (i === 0 ? ' sun' : i === 6 ? ' sat' : '');
+    c.textContent = w;
+    grid.appendChild(c);
+  });
+  const first   = new Date(miniY, miniM, 1).getDay();
+  const dim     = new Date(miniY, miniM + 1, 0).getDate();
+  const dimPrev = new Date(miniY, miniM, 0).getDate();
+  const cells   = Math.ceil((first + dim) / 7) * 7;
+  for (let i = 0; i < cells; i++) {
+    let date, other = false;
+    if (i < first)              { date = new Date(miniY, miniM - 1, dimPrev - first + i + 1); other = true; }
+    else if (i >= first + dim)  { date = new Date(miniY, miniM + 1, i - first - dim + 1);     other = true; }
+    else                          date = new Date(miniY, miniM, i - first + 1);
+    const ds = fmt(date), col = i % 7;
+    const d = document.createElement('div');
+    let cls = 'mc-day';
+    if (other) cls += ' other';
+    if (col === 0) cls += ' sun';
+    if (col === 6) cls += ' sat';
+    if (ds === todayStr) cls += ' today';
+    if (ds === curDay)   cls += ' sel';
+    d.className = cls;
+    d.textContent = date.getDate();
+    d.onclick = () => { curDay = ds; renderDayView(); };
+    grid.appendChild(d);
+  }
+}
+
+function renderDayView() {
+  const [Y, M, D] = curDay.split('-').map(Number);
+  const { weekday } = thaiDate(curDay);
+  const isToday = curDay === todayStr;
+  miniY = Y; miniM = M - 1;
+  renderMiniCal();
+  document.getElementById('cal-title').innerHTML = `Daily <span>${curDay}</span>`;
+  document.getElementById('dv-dmy').textContent =
+    `${String(D).padStart(2, '0')} / ${String(M).padStart(2, '0')} / ${Y}`;
+  const wdEl = document.getElementById('dv-wd');
+  wdEl.textContent = isToday ? `${weekday} · วันนี้` : weekday;
+  wdEl.classList.toggle('is-today', isToday);
+
+  const dayEvs = sortByTime(events.filter(ev =>
+    getDatesInRange(ev.dateStart, ev.dateEnd).includes(curDay)));
+  const allDay = dayEvs.filter(ev => !ev.timeStart);
+  const timed  = dayEvs.filter(ev => ev.timeStart);
+
+  // ── all-day strip ──
+  const adWrap = document.getElementById('vt-allday');
+  adWrap.innerHTML = '';
+  adWrap.style.display = allDay.length ? '' : 'none';
+  allDay.forEach(ev => {
+    const color = ev.color || COLORS[0];
+    const el = document.createElement('div');
+    el.className = 'vt-ad';
+    el.style.background = color;
+    el.style.color = textOn(color);
+    el.textContent = `ทั้งวัน · ${ev.name}` + (ev.sub ? ` · ${ev.sub}` : '');
+    el.onclick = () => openModal(ev.id);
+    adWrap.appendChild(el);
+  });
+
+  // ── hour rows + labels ──
+  const total = HP * 24;
+  const grid = document.getElementById('vt-grid');
+  grid.style.height = total + 'px';
+  const rows = document.getElementById('vt-rows');
+  rows.innerHTML = '';
+  const nowH = new Date().getHours();
+  for (let h = 0; h < 24; h++) {
+    const r = document.createElement('div');
+    r.className = 'vt-row';
+    rows.appendChild(r);
+  }
+  for (let h = 0; h <= 24; h++) {
+    const { n, ap } = fmtHour12(h);
+    const lbl = document.createElement('div');
+    lbl.className = 'vt-h' + (isToday && h === nowH ? ' is-now' : '');
+    lbl.style.top = (h * HP) + 'px';
+    lbl.textContent = `${n}:00 ${ap}`;
+    rows.appendChild(lbl);
+  }
+
+  // ── timed events (Google-style overlap columns) ──
+  const col = document.getElementById('vt-col');
+  [...col.querySelectorAll('.vt-ev')].forEach(n => n.remove());
+  const items = timed.map(ev => {
+    let s = ev.dateStart < curDay ? 0 : toMin(ev.timeStart);
+    let e = ev.dateEnd  > curDay ? 1440
+          : (ev.timeEnd ? toMin(ev.timeEnd) : toMin(ev.timeStart) + 60);
+    if (e <= s) e = s + 30;
+    s = Math.max(0, Math.min(1440, s));
+    e = Math.max(0, Math.min(1440, e));
+    return { ev, s, e };
+  });
+  packEvents(items).forEach(it => {
+    const ev = it.ev, color = ev.color || COLORS[0];
+    const w = 100 / it.cols, left = it.col * w;
+    const block = document.createElement('div');
+    block.className = 'vt-ev';
+    block.style.top    = (it.s / 60 * HP) + 'px';
+    block.style.height = Math.max((it.e - it.s) / 60 * HP - 2, 15) + 'px';
+    block.style.left   = left + '%';
+    block.style.width  = `calc(${w}% - 4px)`;
+    block.style.background = color;
+    block.style.color = textOn(color);
+    const tLabel = ev.timeEnd ? `${ev.timeStart}–${ev.timeEnd}` : ev.timeStart;
+    block.innerHTML =
+      `<span class="e-t">${tLabel}</span><span class="e-n">${ev.name}</span>`;
+    block.title = `${tLabel} · ${ev.name}${ev.sub ? ' · ' + ev.sub : ''}`;
+    block.onclick = e2 => { e2.stopPropagation(); openModal(ev.id); };
+    col.appendChild(block);
+  });
+
+  // คลิกบนพื้นที่ว่าง → เพิ่ม event ตามเวลาที่คลิก
+  col.onclick = e => {
+    if (e.target.closest('.vt-ev')) return;
+    const r = col.getBoundingClientRect();
+    let min = Math.round((e.clientY - r.top) / r.height * 1440 / 30) * 30;
+    min = Math.max(0, Math.min(1410, min));
+    const hh = String(Math.floor(min / 60)).padStart(2, '0');
+    const mm = String(min % 60).padStart(2, '0');
+    openModal(null, curDay, `${hh}:${mm}`);
+  };
+
+  // ── รายการสรุปด้านล่าง (อ่านรายละเอียดครบ) ──
+  const ag = document.getElementById('dv-agenda');
+  const empty = document.getElementById('dv-empty');
+  ag.innerHTML = '';
+  ag.style.display = dayEvs.length === 0 ? 'none' : '';
+  empty.style.display = dayEvs.length === 0 ? '' : 'none';
+  dayEvs.forEach(ev => {
+    const color = ev.color || COLORS[0];
+    const timeHtml = ev.timeStart
+      ? `<div>${ev.timeStart}</div>` +
+        (ev.timeEnd ? `<div style="color:var(--muted);font-weight:400;">${ev.timeEnd}</div>` : '')
+      : `<div class="r-allday">ทั้งวัน</div>`;
+    const span = ev.dateStart !== ev.dateEnd
+      ? `<div class="r-sub">🗓 ${thaiDate(ev.dateStart).full} → ${thaiDate(ev.dateEnd).full}</div>` : '';
+    const row = document.createElement('div');
+    row.className = 'dv-row';
+    row.innerHTML =
+      `<div class="r-bar" style="background:${color}"></div>` +
+      `<div class="r-time">${timeHtml}</div>` +
+      `<div class="r-body">` +
+        `<div class="r-name">${ev.name}</div>` +
+        (ev.sub ? `<div class="r-sub">${ev.sub}</div>` : '') +
+        span +
+        (ev.note ? `<div class="r-note">${ev.note}</div>` : '') +
+      `</div>`;
+    row.onclick = () => openModal(ev.id);
+    ag.appendChild(row);
+  });
+
+  updateNowLine();
+
+  // เลื่อนจอไปยังเวลาที่น่าสนใจ (ปัจจุบัน / event แรก / 08:00)
+  requestAnimationFrame(() => {
+    const sc = document.getElementById('vt-scroll');
+    if (!sc) return;
+    let tMin;
+    if (isToday) { const n = new Date(); tMin = n.getHours() * 60 + n.getMinutes(); }
+    else if (timed.length) tMin = items[0].s;
+    else tMin = 8 * 60;
+    sc.scrollTop = Math.max(0, tMin / 60 * HP - sc.clientHeight / 2);
+  });
+}
+
+function setView(mode) {
+  viewMode = mode;
+  document.getElementById('vt-month').classList.toggle('active', mode === 'month');
+  document.getElementById('vt-day').classList.toggle('active', mode === 'day');
+  document.getElementById('cal-wrap').style.display  = mode === 'month' ? '' : 'none';
+  document.getElementById('day-wrap').style.display  = mode === 'day' ? '' : 'none';
+  if (mode === 'day') renderDayView(); else renderMonth();
 }
 
 function openDayPanel(dateStr) {
@@ -580,10 +1096,44 @@ document.getElementById('delete-btn').onclick = async () => {
   closeModal();
 };
 
-document.getElementById('add-btn').onclick    = () => openModal(null, null);
-document.getElementById('today-btn').onclick  = () => { cur = { y: new Date().getFullYear(), m: new Date().getMonth() }; renderMonth(); };
-document.getElementById('prev-btn').onclick   = () => { if (--cur.m < 0)  { cur.m = 11; cur.y--; } renderMonth(); };
-document.getElementById('next-btn').onclick   = () => { if (++cur.m > 11) { cur.m = 0;  cur.y++; } renderMonth(); };
+document.getElementById('add-btn').onclick = () =>
+  openModal(null, viewMode === 'day' ? curDay : null);
+
+document.getElementById('today-btn').onclick = () => {
+  if (viewMode === 'day') { curDay = todayStr; renderDayView(); }
+  else { cur = { y: new Date().getFullYear(), m: new Date().getMonth() }; renderMonth(); }
+};
+document.getElementById('prev-btn').onclick = () => {
+  if (viewMode === 'day') { curDay = shiftDay(curDay, -1); renderDayView(); }
+  else { if (--cur.m < 0) { cur.m = 11; cur.y--; } renderMonth(); }
+};
+document.getElementById('next-btn').onclick = () => {
+  if (viewMode === 'day') { curDay = shiftDay(curDay, 1); renderDayView(); }
+  else { if (++cur.m > 11) { cur.m = 0; cur.y++; } renderMonth(); }
+};
+
+document.getElementById('vt-month').onclick = () => setView('month');
+document.getElementById('vt-day').onclick   = () => setView('day');
+
+document.getElementById('mc-prev').onclick = () => {
+  if (--miniM < 0) { miniM = 11; miniY--; } renderMiniCal();
+};
+document.getElementById('mc-next').onclick = () => {
+  if (++miniM > 11) { miniM = 0; miniY++; } renderMiniCal();
+};
+
+// ── Live clock (เวลาปัจจุบัน: ชั่วโมง:นาที:วินาที) ──
+function updateClock() {
+  const now = new Date();
+  const p = n => String(n).padStart(2, '0');
+  document.getElementById('clock-time').textContent =
+    `${p(now.getHours())}:${p(now.getMinutes())}:${p(now.getSeconds())}`;
+  document.getElementById('clock-date').textContent =
+    `${TH_DAYS[now.getDay()]} ${now.getDate()} ${TH_MONTHS[now.getMonth()]} ${now.getFullYear() + 543}`;
+  updateNowLine();
+}
+updateClock();
+setInterval(updateClock, 1000);
 
 </script>
 
