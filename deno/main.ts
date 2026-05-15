@@ -259,7 +259,7 @@ async function verifySignature(raw: string, sig: string): Promise<boolean> {
 
 Deno.serve(async (req: Request) => {
   if (req.method !== "POST") {
-    return new Response("calendar LINE bot is running");
+    return new Response("calendar LINE bot is running — build 92189ce-atfix");
   }
   const raw = await req.text();
   const sig = req.headers.get("x-line-signature") ?? "";
